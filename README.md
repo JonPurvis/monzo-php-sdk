@@ -1,1 +1,365 @@
-# monzo-php-sdk
+# Monzo PHP SDK
+
+Framework-agnostic client for the [Monzo Developer API](https://docs.monzo.com/), built with [Saloon](https://docs.saloon.dev/) v4.
+
+- **Package:** `jonpurvis/monzo-php`
+- **Namespace:** `JonPurvis\Monzo`
+- **PHP:** 8.2+
+- **Runtime dependency:** `saloonphp/saloon` only
+
+The Monzo Developer API is for personal integrations (your account or a small set of users you explicitly allow). It is not intended for public apps. See Monzo’s documentation for Strong Customer Authentication and usage limits.
+
+## Installation
+
+```bash
+composer require jonpurvis/monzo-php
+```
+
+Register a client at [developers.monzo.com](https://developers.monzo.com) to obtain `client_id`, `client_secret`, and a `redirect_uri`.
+
+## Creating a client
+
+```php
+<?php
+
+use JonPurvis\Monzo\Monzo;
+
+// API calls with an access token only
+$monzo = Monzo::connect(accessToken: $accessToken);
+
+// OAuth setup (token exchange / refresh) — pass client credentials once
+$monzo = Monzo::connect(
+    clientId: $clientId,
+    clientSecret: $clientSecret,
+    redirectUri: $redirectUri,
+);
+
+// Combine: credentials for OAuth + token for API calls
+$monzo = Monzo::connect(
+    accessToken: $accessToken,
+    clientId: $clientId,
+    clientSecret: $clientSecret,
+    redirectUri: $redirectUri,
+);
+
+// Immutable-style token swap (returns a new connector instance)
+$monzo = $monzo->withAccessToken($newAccessToken);
+
+// Set or replace OAuth client settings
+$monzo = $monzo->withOAuthClient($clientId, $clientSecret, $redirectUri);
+```
+
+All resource methods return a `JonPurvis\Monzo\MonzoResponse` (Saloon response). Call `->throw()` to convert HTTP errors into `JonPurvis\Monzo\Exceptions\MonzoRequestException`, or use `->json()`, `->status()`, etc. directly.
+
+## OAuth 2.0
+
+Monzo uses OAuth 2.0 with optional refresh tokens for **confidential** clients. **Token storage is your application’s responsibility** — persist `access_token`, `refresh_token`, and expiry (e.g. from `expires_in`). Do not serialize Saloon `AccessTokenAuthenticator` objects ([Saloon v4 notes](https://docs.saloon.dev/upgrade/upgrading-from-v3-to-v4)).
+
+### Authorization URL
+
+Send the user to Monzo (include a CSRF `state` you verify on callback):
+
+```php
+$url = $monzo->oauth()->authorizationUrl(state: $csrfToken);
+
+// Or without a connector:
+use JonPurvis\Monzo\OAuth\AuthorizationUrl;
+
+$url = AuthorizationUrl::make($clientId, $redirectUri, $state);
+```
+
+User flow: browser login → approve access in the Monzo app → redirect to your `redirect_uri` with `?code=...&state=...`.
+
+### Token exchange, refresh, logout
+
+```php
+$tokens = $monzo->oauth()
+    ->exchangeAuthorizationCode($authorizationCode)
+    ->throw()
+    ->json();
+
+// $tokens: access_token, refresh_token, expires_in, token_type, user_id, client_id
+
+$monzo = $monzo->withAccessToken($tokens['access_token']);
+
+$refreshed = $monzo->oauth()
+    ->refreshAccessToken($tokens['refresh_token'])
+    ->throw()
+    ->json();
+
+$monzo->oauth()->logout()->throw(); // invalidates token; user must re-authenticate
+```
+
+### Whoami
+
+Inspect the current access token:
+
+```php
+$whoami = $monzo->oauth()->whoami()->throw()->json();
+// authenticated, client_id, user_id
+```
+
+---
+
+## Accounts
+
+**`GET /accounts`**
+
+```php
+$response = $monzo->accounts()->list()->throw();
+$accounts = $response->json('accounts');
+
+// Optional filter: uk_retail, uk_retail_joint
+$retail = $monzo->accounts()->list(accountType: 'uk_retail')->throw()->json('accounts');
+```
+
+---
+
+## Balance
+
+**`GET /balance`**
+
+```php
+$balance = $monzo->balance()
+    ->get(accountId: 'acc_...')
+    ->throw()
+    ->json();
+
+// balance, total_balance, currency, spend_today (amounts in minor units, e.g. pence)
+```
+
+---
+
+## Pots
+
+**`GET /pots`**, **`PUT /pots/{id}/deposit`**, **`PUT /pots/{id}/withdraw`**
+
+```php
+$pots = $monzo->pots()
+    ->list(currentAccountId: 'acc_...')
+    ->throw()
+    ->json('pots');
+
+$monzo->pots()->deposit(
+    potId: 'pot_...',
+    amount: 1000,              // minor units (e.g. £10.00 = 1000)
+    sourceAccountId: 'acc_...',
+    dedupeId: 'optional-id',   // optional; auto-generated if omitted
+)->throw();
+
+$monzo->pots()->withdraw(
+    potId: 'pot_...',
+    amount: 500,
+    destinationAccountId: 'acc_...',
+    dedupeId: 'optional-id',
+)->throw();
+```
+
+---
+
+## Transactions
+
+**`GET /transactions`**, **`GET /transactions/{id}`**, **`PATCH /transactions/{id}`** (annotate metadata)
+
+```php
+$tx = $monzo->transactions()
+    ->get('tx_...', expand: ['merchant'])
+    ->throw()
+    ->json('transaction');
+
+$list = $monzo->transactions()->list(
+    accountId: 'acc_...',
+    since: '2025-01-01T00:00:00Z',  // RFC 3339 timestamp or object id
+    before: '2025-12-31T23:59:59Z',
+    limit: 100,                      // max 100
+    expand: ['merchant'],
+)->throw()->json('transactions');
+
+$monzo->transactions()->annotate(
+    transactionId: 'tx_...',
+    metadata: ['foo' => 'bar'],      // private to your app
+    notes: 'Optional note',          // sets metadata[notes] → transaction notes
+)->throw();
+```
+
+**SCA / history:** After the user authenticates, you can usually fetch full transaction history initially; after ~5 minutes, sync may be limited to roughly the last 90 days unless you stored history at auth time. Plan accordingly ([Monzo docs](https://docs.monzo.com/)).
+
+---
+
+## Feed items
+
+**`POST /feed`** — create a `basic` feed item in the user’s Monzo feed.
+
+```php
+$monzo->feed()->createBasic(
+    accountId: 'acc_...',
+    title: 'My custom item',
+    imageUrl: 'https://example.com/image.png',
+    url: 'https://example.com/on-tap',  // optional
+    body: 'Body text',
+    backgroundColor: '#FCF1EE',
+    titleColor: '#333333',
+    bodyColor: '#666666',
+)->throw();
+
+// Full control over type and params map
+$monzo->feed()->create(
+    accountId: 'acc_...',
+    type: 'basic',
+    params: [
+        'title' => 'Title',
+        'image_url' => 'https://example.com/image.png',
+    ],
+    url: 'https://example.com',
+)->throw();
+```
+
+---
+
+## Attachments
+
+Register images (e.g. receipts) against transactions.
+
+1. **`POST /attachment/upload`** — get `upload_url` and `file_url`
+2. **PUT** file bytes to `upload_url` (pre-signed; not Monzo’s API host)
+3. **`POST /attachment/register`** — link `file_url` to a transaction
+4. **`POST /attachment/deregister`** — remove by attachment id
+
+```php
+// Step-by-step
+$upload = $monzo->attachments()
+    ->requestUploadUrl('receipt.png', 'image/png', strlen($bytes))
+    ->throw()
+    ->json();
+
+$monzo->attachments()
+    ->uploadToUrl($upload['upload_url'], $bytes, 'image/png')
+    ->throw();
+
+$monzo->attachments()
+    ->register('tx_...', $upload['file_url'], 'image/png')
+    ->throw();
+
+// All-in-one helper (upload URL → S3 → register)
+$monzo->attachments()->uploadAndRegister(
+    transactionId: 'tx_...',
+    fileName: 'receipt.png',
+    fileContents: $bytes,
+    fileType: 'image/png',
+)->throw();
+
+// Remote-hosted file (skip upload steps)
+$monzo->attachments()->register('tx_...', 'https://example.com/receipt.png', 'image/png')->throw();
+
+$monzo->attachments()->deregister('attach_...')->throw();
+```
+
+---
+
+## Receipts
+
+**`PUT /transaction-receipts`** (JSON body), **`GET`**, **`DELETE`** by `external_id`.
+
+`external_id` is your idempotency key (e.g. order number). Re-`create()` with the same `external_id` updates the receipt.
+
+```php
+$receipt = [
+    'transaction_id' => 'tx_...',
+    'external_id' => 'order-12345',
+    'total' => 1299,
+    'currency' => 'GBP',
+    'items' => [
+        [
+            'description' => 'Coffee',
+            'quantity' => 1,
+            'amount' => 1299,
+            'currency' => 'GBP',
+        ],
+    ],
+    'taxes' => [],
+    'payments' => [],
+];
+
+$monzo->receipts()->create($receipt)->throw();
+
+$fetched = $monzo->receipts()->get('order-12345')->throw()->json('receipt');
+
+$monzo->receipts()->delete('order-12345')->throw();
+```
+
+See [Monzo receipt schema](https://docs.monzo.com/) for `items`, `taxes`, `payments`, and `merchant` fields.
+
+---
+
+## Webhooks
+
+**`POST /webhooks`**, **`GET /webhooks`**, **`DELETE /webhooks/{id}`**
+
+```php
+$created = $monzo->webhooks()
+    ->register(accountId: 'acc_...', url: 'https://example.com/monzo/webhook')
+    ->throw()
+    ->json('webhook');
+
+$list = $monzo->webhooks()->list('acc_...')->throw()->json('webhooks');
+
+$monzo->webhooks()->delete('webhook_...')->throw();
+```
+
+Monzo POSTs to your URL when events occur (e.g. **`transaction.created`**), with retries on failure. Validate and handle payloads in your HTTP endpoint.
+
+---
+
+## Errors
+
+| HTTP | Typical meaning |
+|------|-----------------|
+| 400 | Bad request |
+| 401 | Unauthorized (`error: invalid_token` when token expired/invalid) |
+| 403 | Forbidden |
+| 404 | Not found |
+| 429 | Rate limited |
+| 5xx | Monzo server / gateway errors |
+
+```php
+use JonPurvis\Monzo\Exceptions\MonzoRequestException;
+
+try {
+    $monzo->accounts()->list()->throw();
+} catch (MonzoRequestException $e) {
+    $e->status;       // HTTP status code
+    $e->errorCode;    // e.g. invalid_token
+    $e->responseBody; // decoded JSON if present
+}
+```
+
+---
+
+## Advanced: Saloon requests
+
+Every endpoint has a dedicated request class under `JonPurvis\Monzo\Requests\` if you prefer Saloon’s `send()` API or need to customise headers/plugins:
+
+```php
+use JonPurvis\Monzo\Requests\Ping\WhoamiRequest;
+
+$response = $monzo->send(new WhoamiRequest());
+```
+
+Request classes map to the public API documented at [docs.monzo.com](https://docs.monzo.com/).
+
+---
+
+## Development
+
+```bash
+composer install
+composer test              # PHPUnit
+composer format            # PHP-CS-Fixer
+composer format:check      # dry run
+```
+
+Tests use Saloon `MockClient` and fixtures in `tests/Fixtures/Saloon/` (payloads based on official API documentation).
+
+## License
+
+MIT — see [LICENSE](LICENSE). Copyright JonPurvis.

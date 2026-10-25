@@ -1,0 +1,17 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": {
+        "receipt": {
+            "id": "receipt_00009eNJqNeJvKeoQA",
+            "external_id": "test-receipt-1",
+            "transaction_id": "tx_00008zIcpb1TB4yeIFXMzx",
+            "total": 1299,
+            "currency": "GBP",
+            "items": []
+        }
+    },
+    "context": {}
+}

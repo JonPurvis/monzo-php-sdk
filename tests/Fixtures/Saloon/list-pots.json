@@ -1,0 +1,21 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": {
+        "pots": [
+            {
+                "id": "pot_0000778xxfgh4iu8z83nWb",
+                "name": "Savings",
+                "style": "beach_ball",
+                "balance": 5500,
+                "currency": "GBP",
+                "created": "2017-06-05T11:09:21.752Z",
+                "updated": "2017-06-05T11:09:21.752Z",
+                "deleted": false
+            }
+        ]
+    },
+    "context": {}
+}

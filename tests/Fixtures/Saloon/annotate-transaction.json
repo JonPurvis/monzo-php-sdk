@@ -1,0 +1,24 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": {
+        "transaction": {
+            "amount": -679,
+            "created": "2015-08-23T16:15:03Z",
+            "currency": "GBP",
+            "description": "VUE BSL LTD            ISLINGTON     GBR",
+            "id": "tx_00008zL2INM3xZ41THuRF3",
+            "merchant": "merch_00008z6uFVhVBcaZzSQwCX",
+            "metadata": {
+                "foo": "bar"
+            },
+            "notes": "",
+            "is_load": false,
+            "settled": "2015-08-24T16:15:03Z",
+            "category": "eating_out"
+        }
+    },
+    "context": {}
+}

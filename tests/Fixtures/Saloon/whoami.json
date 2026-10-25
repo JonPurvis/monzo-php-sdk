@@ -1,0 +1,12 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": {
+        "authenticated": true,
+        "client_id": "client_id",
+        "user_id": "user_id"
+    },
+    "context": {}
+}

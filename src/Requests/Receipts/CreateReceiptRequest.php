@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+namespace JonPurvis\Monzo\Requests\Receipts;
+
+use Saloon\Contracts\Body\HasBody;
+use Saloon\Enums\Method;
+use Saloon\Http\Request;
+use Saloon\Traits\Body\HasJsonBody;
+
+class CreateReceiptRequest extends Request implements HasBody
+{
+    use HasJsonBody;
+
+    protected Method $method = Method::PUT;
+
+    /**
+     * @param  array<string, mixed>  $receipt
+     */
+    public function __construct(
+        protected array $receipt,
+    ) {
+        //
+    }
+
+    public function resolveEndpoint(): string
+    {
+        return '/transaction-receipts';
+    }
+
+    protected function defaultBody(): array
+    {
+        return $this->receipt;
+    }
+}

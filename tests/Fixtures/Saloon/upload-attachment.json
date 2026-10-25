@@ -1,0 +1,11 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": {
+        "file_url": "https://s3-eu-west-1.amazonaws.com/mondo-image-uploads/user/foo.png",
+        "upload_url": "https://mondo-image-uploads.s3.amazonaws.com/user/foo.png"
+    },
+    "context": {}
+}

@@ -1,0 +1,16 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": {
+        "webhooks": [
+            {
+                "account_id": "acc_00009237aqC8c5umZmrRdh",
+                "id": "webhook_id",
+                "url": "http://example.com"
+            }
+        ]
+    },
+    "context": {}
+}

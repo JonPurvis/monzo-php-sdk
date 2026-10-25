@@ -1,0 +1,17 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": {
+        "attachment": {
+            "id": "attach_00009238aOAIvVqfb9LrZh",
+            "user_id": "user_00009238aMBIIrS5Rdncq9",
+            "external_id": "tx_00008zIcpb1TB4yeIFXMzx",
+            "file_url": "https://s3-eu-west-1.amazonaws.com/mondo-image-uploads/user/foo.png",
+            "file_type": "image/png",
+            "created": "2015-11-12T18:37:02Z"
+        }
+    },
+    "context": {}
+}
