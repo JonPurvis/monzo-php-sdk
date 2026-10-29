@@ -31,6 +31,7 @@ class AnnotateTransactionRequest extends Request implements HasBody
         return '/transactions/'.$this->transactionId;
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         $body = [];

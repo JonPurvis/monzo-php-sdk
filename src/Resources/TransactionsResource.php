@@ -8,16 +8,15 @@ use JonPurvis\Monzo\MonzoResponse;
 use JonPurvis\Monzo\Requests\Transactions\AnnotateTransactionRequest;
 use JonPurvis\Monzo\Requests\Transactions\GetTransactionRequest;
 use JonPurvis\Monzo\Requests\Transactions\ListTransactionsRequest;
-use Saloon\Http\BaseResource;
 
-class TransactionsResource extends BaseResource
+class TransactionsResource extends MonzoResource
 {
     /**
      * @param  list<string>  $expand
      */
     public function get(string $transactionId, array $expand = []): MonzoResponse
     {
-        return $this->connector->send(new GetTransactionRequest($transactionId, $expand));
+        return $this->sendMonzoRequest(new GetTransactionRequest($transactionId, $expand));
     }
 
     /**
@@ -30,7 +29,7 @@ class TransactionsResource extends BaseResource
         ?int $limit = null,
         array $expand = [],
     ): MonzoResponse {
-        return $this->connector->send(new ListTransactionsRequest(
+        return $this->sendMonzoRequest(new ListTransactionsRequest(
             accountId: $accountId,
             since: $since,
             before: $before,
@@ -47,7 +46,7 @@ class TransactionsResource extends BaseResource
         array $metadata = [],
         ?string $notes = null,
     ): MonzoResponse {
-        return $this->connector->send(new AnnotateTransactionRequest(
+        return $this->sendMonzoRequest(new AnnotateTransactionRequest(
             transactionId: $transactionId,
             metadata: $metadata,
             notes: $notes,

@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace JonPurvis\Monzo\Resources\Concerns;
 
 use JonPurvis\Monzo\Monzo;
-use LogicException;
 
+/**
+ * @property-read Monzo $connector
+ */
 trait InteractsWithMonzo
 {
     protected function monzo(): Monzo
     {
-        if (! $this->connector instanceof Monzo) {
-            throw new LogicException('Expected Monzo connector.');
-        }
-
         return $this->connector;
     }
 }

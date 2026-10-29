@@ -28,6 +28,7 @@ class UploadAttachmentRequest extends Request implements HasBody
         return '/attachment/upload';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [

@@ -29,6 +29,7 @@ class ListTransactionsRequest extends Request
         return '/transactions';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultQuery(): array
     {
         return array_filter([

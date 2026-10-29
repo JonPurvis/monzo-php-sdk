@@ -22,6 +22,7 @@ class GetReceiptRequest extends Request
         return '/transaction-receipts';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultQuery(): array
     {
         return [

@@ -37,8 +37,8 @@ class Monzo extends Connector
         ?string $clientId = null,
         ?string $clientSecret = null,
         ?string $redirectUri = null,
-    ): static {
-        return new static($accessToken, $clientId, $clientSecret, $redirectUri);
+    ): self {
+        return new self($accessToken, $clientId, $clientSecret, $redirectUri);
     }
 
     public function withAccessToken(string $accessToken): static

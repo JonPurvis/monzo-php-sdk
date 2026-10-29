@@ -27,6 +27,7 @@ class RegisterWebhookRequest extends Request implements HasBody
         return '/webhooks';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [

@@ -22,6 +22,7 @@ class GetBalanceRequest extends Request
         return '/balance';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultQuery(): array
     {
         return [

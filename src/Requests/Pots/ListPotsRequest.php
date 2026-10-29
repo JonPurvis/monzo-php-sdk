@@ -22,6 +22,7 @@ class ListPotsRequest extends Request
         return '/pots';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultQuery(): array
     {
         return [

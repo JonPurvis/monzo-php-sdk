@@ -95,7 +95,7 @@ class MonzoApiTest extends TestCase
         ]);
 
         $this->monzo()->oauth()->logout()->throw();
-        $this->assertTrue(true);
+        $this->expectNotToPerformAssertions();
     }
 
     public function test_list_accounts(): void
@@ -106,7 +106,9 @@ class MonzoApiTest extends TestCase
 
         $response = $this->monzo()->accounts()->list()->throw();
 
-        $this->assertCount(1, $response->json('accounts'));
+        $accounts = $response->json('accounts');
+        $this->assertIsArray($accounts);
+        $this->assertCount(1, $accounts);
     }
 
     public function test_get_balance(): void
@@ -128,7 +130,9 @@ class MonzoApiTest extends TestCase
 
         $response = $this->monzo()->pots()->list('acc_123')->throw();
 
-        $this->assertCount(1, $response->json('pots'));
+        $pots = $response->json('pots');
+        $this->assertIsArray($pots);
+        $this->assertCount(1, $pots);
     }
 
     public function test_deposit_and_withdraw_pot(): void
@@ -157,7 +161,9 @@ class MonzoApiTest extends TestCase
         $this->assertSame('tx_00008zIcpb1TB4yeIFXMzx', $one->json('transaction.id'));
 
         $list = $this->monzo()->transactions()->list('acc_1', since: '2025-01-01T00:00:00Z', limit: 50)->throw();
-        $this->assertCount(1, $list->json('transactions'));
+        $transactions = $list->json('transactions');
+        $this->assertIsArray($transactions);
+        $this->assertCount(1, $transactions);
 
         $annotated = $this->monzo()->transactions()->annotate('tx_1', metadata: ['foo' => 'bar'])->throw();
         $this->assertSame('bar', $annotated->json('transaction.metadata.foo'));
@@ -175,7 +181,7 @@ class MonzoApiTest extends TestCase
             imageUrl: 'https://example.com/image.png',
         )->throw();
 
-        $this->assertTrue(true);
+        $this->expectNotToPerformAssertions();
     }
 
     public function test_attachments(): void
@@ -236,7 +242,9 @@ class MonzoApiTest extends TestCase
         $this->assertSame('webhook_id', $registered->json('webhook.id'));
 
         $list = $this->monzo()->webhooks()->list('acc_1')->throw();
-        $this->assertCount(1, $list->json('webhooks'));
+        $webhooks = $list->json('webhooks');
+        $this->assertIsArray($webhooks);
+        $this->assertCount(1, $webhooks);
 
         $this->monzo()->webhooks()->delete('webhook_id')->throw();
     }

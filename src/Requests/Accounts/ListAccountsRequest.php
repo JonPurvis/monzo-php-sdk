@@ -22,6 +22,7 @@ class ListAccountsRequest extends Request
         return '/accounts';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultQuery(): array
     {
         return array_filter([

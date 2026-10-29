@@ -20,6 +20,7 @@ class LogoutRequest extends Request implements HasBody
         return '/oauth2/logout';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [];

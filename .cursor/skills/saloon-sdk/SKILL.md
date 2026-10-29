@@ -74,6 +74,6 @@ $response = $connector->send(new WhoamiRequest());
 - [ ] `composer test` passes
 - [ ] Every public endpoint has a request class + fixture-backed test
 - [ ] README: install, auth flow, plain PHP example (no framework)
-- [ ] PHP-CS-Fixer on `src/` and `tests/`
+- [ ] PHP-CS-Fixer, Rector, PHPStan (max), PHPUnit — `composer test`
 
 See [reference.md](reference.md) for v4 security notes and links.

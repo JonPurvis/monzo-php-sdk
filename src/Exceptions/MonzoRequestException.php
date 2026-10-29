@@ -9,6 +9,9 @@ use Throwable;
 
 class MonzoRequestException extends MonzoException
 {
+    /**
+     * @param  array<array-key, mixed>|null  $responseBody
+     */
     public function __construct(
         string $message,
         public readonly int $status,
@@ -21,8 +24,9 @@ class MonzoRequestException extends MonzoException
 
     public static function fromResponse(MonzoResponse $response): self
     {
+        /** @var array<array-key, mixed> $body */
         $body = $response->json();
-        $error = is_array($body) ? ($body['error'] ?? $body['message'] ?? null) : null;
+        $error = $body['error'] ?? $body['message'] ?? null;
         $errorCode = is_string($error) ? $error : null;
 
         $message = match ($response->status()) {
@@ -44,7 +48,7 @@ class MonzoRequestException extends MonzoException
             message: $message,
             status: $response->status(),
             errorCode: $errorCode,
-            responseBody: is_array($body) ? $body : null,
+            responseBody: $body,
         );
     }
 }

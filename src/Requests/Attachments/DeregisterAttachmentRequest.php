@@ -26,6 +26,7 @@ class DeregisterAttachmentRequest extends Request implements HasBody
         return '/attachment/deregister';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [

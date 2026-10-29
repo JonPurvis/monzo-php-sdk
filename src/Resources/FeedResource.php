@@ -6,9 +6,8 @@ namespace JonPurvis\Monzo\Resources;
 
 use JonPurvis\Monzo\MonzoResponse;
 use JonPurvis\Monzo\Requests\Feed\CreateFeedItemRequest;
-use Saloon\Http\BaseResource;
 
-class FeedResource extends BaseResource
+class FeedResource extends MonzoResource
 {
     /**
      * @param  array<string, string>  $params
@@ -19,7 +18,7 @@ class FeedResource extends BaseResource
         array $params,
         ?string $url = null,
     ): MonzoResponse {
-        return $this->connector->send(new CreateFeedItemRequest(
+        return $this->sendMonzoRequest(new CreateFeedItemRequest(
             accountId: $accountId,
             type: $type,
             params: $params,
@@ -27,9 +26,6 @@ class FeedResource extends BaseResource
         ));
     }
 
-    /**
-     * @param  array<string, string>  $params
-     */
     public function createBasic(
         string $accountId,
         string $title,

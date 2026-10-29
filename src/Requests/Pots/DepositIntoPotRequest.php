@@ -29,6 +29,7 @@ class DepositIntoPotRequest extends Request implements HasBody
         return '/pots/'.$this->potId.'/deposit';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [

@@ -32,6 +32,7 @@ class CreateFeedItemRequest extends Request implements HasBody
         return '/feed';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         $body = [

@@ -9,16 +9,15 @@ use JonPurvis\Monzo\Requests\Attachments\DeregisterAttachmentRequest;
 use JonPurvis\Monzo\Requests\Attachments\RegisterAttachmentRequest;
 use JonPurvis\Monzo\Requests\Attachments\UploadAttachmentRequest;
 use JonPurvis\Monzo\Requests\Attachments\UploadFileToUrlRequest;
-use Saloon\Http\BaseResource;
 
-class AttachmentsResource extends BaseResource
+class AttachmentsResource extends MonzoResource
 {
     public function requestUploadUrl(
         string $fileName,
         string $fileType,
         int $contentLength,
     ): MonzoResponse {
-        return $this->connector->send(new UploadAttachmentRequest(
+        return $this->sendMonzoRequest(new UploadAttachmentRequest(
             fileName: $fileName,
             fileType: $fileType,
             contentLength: $contentLength,
@@ -27,7 +26,7 @@ class AttachmentsResource extends BaseResource
 
     public function uploadToUrl(string $uploadUrl, string $fileContents, string $contentType): MonzoResponse
     {
-        return $this->connector->send(new UploadFileToUrlRequest(
+        return $this->sendMonzoRequest(new UploadFileToUrlRequest(
             uploadUrl: $uploadUrl,
             fileContents: $fileContents,
             contentType: $contentType,
@@ -60,7 +59,7 @@ class AttachmentsResource extends BaseResource
 
     public function register(string $externalId, string $fileUrl, string $fileType): MonzoResponse
     {
-        return $this->connector->send(new RegisterAttachmentRequest(
+        return $this->sendMonzoRequest(new RegisterAttachmentRequest(
             externalId: $externalId,
             fileUrl: $fileUrl,
             fileType: $fileType,
@@ -69,6 +68,6 @@ class AttachmentsResource extends BaseResource
 
     public function deregister(string $attachmentId): MonzoResponse
     {
-        return $this->connector->send(new DeregisterAttachmentRequest($attachmentId));
+        return $this->sendMonzoRequest(new DeregisterAttachmentRequest($attachmentId));
     }
 }

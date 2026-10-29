@@ -29,6 +29,7 @@ class ExchangeAuthorizationCodeRequest extends Request implements HasBody
         return '/oauth2/token';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [

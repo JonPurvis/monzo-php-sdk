@@ -8,13 +8,12 @@ use JonPurvis\Monzo\MonzoResponse;
 use JonPurvis\Monzo\Requests\Pots\DepositIntoPotRequest;
 use JonPurvis\Monzo\Requests\Pots\ListPotsRequest;
 use JonPurvis\Monzo\Requests\Pots\WithdrawFromPotRequest;
-use Saloon\Http\BaseResource;
 
-class PotsResource extends BaseResource
+class PotsResource extends MonzoResource
 {
     public function list(string $currentAccountId): MonzoResponse
     {
-        return $this->connector->send(new ListPotsRequest($currentAccountId));
+        return $this->sendMonzoRequest(new ListPotsRequest($currentAccountId));
     }
 
     public function deposit(
@@ -23,7 +22,7 @@ class PotsResource extends BaseResource
         string $sourceAccountId,
         ?string $dedupeId = null,
     ): MonzoResponse {
-        return $this->connector->send(new DepositIntoPotRequest(
+        return $this->sendMonzoRequest(new DepositIntoPotRequest(
             potId: $potId,
             amount: $amount,
             sourceAccountId: $sourceAccountId,
@@ -37,7 +36,7 @@ class PotsResource extends BaseResource
         string $destinationAccountId,
         ?string $dedupeId = null,
     ): MonzoResponse {
-        return $this->connector->send(new WithdrawFromPotRequest(
+        return $this->sendMonzoRequest(new WithdrawFromPotRequest(
             potId: $potId,
             amount: $amount,
             destinationAccountId: $destinationAccountId,

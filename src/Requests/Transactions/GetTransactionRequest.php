@@ -26,6 +26,7 @@ class GetTransactionRequest extends Request
         return '/transactions/'.$this->transactionId;
     }
 
+    /** @return array<string, mixed> */
     protected function defaultQuery(): array
     {
         if ($this->expand === []) {

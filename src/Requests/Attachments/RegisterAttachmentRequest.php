@@ -28,6 +28,7 @@ class RegisterAttachmentRequest extends Request implements HasBody
         return '/attachment/register';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [

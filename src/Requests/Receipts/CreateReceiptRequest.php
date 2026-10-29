@@ -29,6 +29,7 @@ class CreateReceiptRequest extends Request implements HasBody
         return '/transaction-receipts';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return $this->receipt;

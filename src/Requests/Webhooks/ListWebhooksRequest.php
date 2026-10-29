@@ -22,6 +22,7 @@ class ListWebhooksRequest extends Request
         return '/webhooks';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultQuery(): array
     {
         return [

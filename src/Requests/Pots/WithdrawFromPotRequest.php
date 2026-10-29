@@ -29,6 +29,7 @@ class WithdrawFromPotRequest extends Request implements HasBody
         return '/pots/'.$this->potId.'/withdraw';
     }
 
+    /** @return array<string, mixed> */
     protected function defaultBody(): array
     {
         return [

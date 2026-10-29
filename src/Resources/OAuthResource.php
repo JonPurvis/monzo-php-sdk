@@ -10,13 +10,9 @@ use JonPurvis\Monzo\Requests\OAuth\ExchangeAuthorizationCodeRequest;
 use JonPurvis\Monzo\Requests\OAuth\LogoutRequest;
 use JonPurvis\Monzo\Requests\OAuth\RefreshAccessTokenRequest;
 use JonPurvis\Monzo\Requests\Ping\WhoamiRequest;
-use JonPurvis\Monzo\Resources\Concerns\InteractsWithMonzo;
-use Saloon\Http\BaseResource;
 
-class OAuthResource extends BaseResource
+class OAuthResource extends MonzoResource
 {
-    use InteractsWithMonzo;
-
     public function authorizationUrl(?string $state = null): string
     {
         $monzo = $this->monzo();
@@ -31,7 +27,7 @@ class OAuthResource extends BaseResource
 
     public function whoami(): MonzoResponse
     {
-        return $this->connector->send(new WhoamiRequest());
+        return $this->sendMonzoRequest(new WhoamiRequest());
     }
 
     public function exchangeAuthorizationCode(string $code): MonzoResponse
@@ -39,7 +35,7 @@ class OAuthResource extends BaseResource
         $monzo = $this->monzo();
         $monzo->ensureOAuthCredentials();
 
-        return $this->connector->send(new ExchangeAuthorizationCodeRequest(
+        return $this->sendMonzoRequest(new ExchangeAuthorizationCodeRequest(
             code: $code,
             clientId: (string) $monzo->getClientId(),
             clientSecret: (string) $monzo->getClientSecret(),
@@ -52,7 +48,7 @@ class OAuthResource extends BaseResource
         $monzo = $this->monzo();
         $monzo->ensureOAuthCredentials();
 
-        return $this->connector->send(new RefreshAccessTokenRequest(
+        return $this->sendMonzoRequest(new RefreshAccessTokenRequest(
             refreshToken: $refreshToken,
             clientId: (string) $monzo->getClientId(),
             clientSecret: (string) $monzo->getClientSecret(),
@@ -61,6 +57,6 @@ class OAuthResource extends BaseResource
 
     public function logout(): MonzoResponse
     {
-        return $this->connector->send(new LogoutRequest());
+        return $this->sendMonzoRequest(new LogoutRequest());
     }
 }
