@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace JonPurvis\Monzo;
 
 use JonPurvis\Monzo\Exceptions\MonzoException;
+use JonPurvis\Monzo\Exceptions\MonzoRequestException;
+use JonPurvis\Monzo\Requests\OAuth\ExchangeAuthorizationCodeRequest;
+use JonPurvis\Monzo\Requests\OAuth\RefreshAccessTokenRequest;
+use JonPurvis\Monzo\Requests\Ping\WhoamiRequest;
 use JonPurvis\Monzo\Resources\AccountsResource;
 use JonPurvis\Monzo\Resources\AttachmentsResource;
 use JonPurvis\Monzo\Resources\BalanceResource;
@@ -14,14 +18,20 @@ use JonPurvis\Monzo\Resources\PotsResource;
 use JonPurvis\Monzo\Resources\ReceiptsResource;
 use JonPurvis\Monzo\Resources\TransactionsResource;
 use JonPurvis\Monzo\Resources\WebhooksResource;
+use Saloon\Helpers\OAuth2\OAuthConfig;
 use Saloon\Http\Auth\NullAuthenticator;
 use Saloon\Http\Auth\TokenAuthenticator;
 use Saloon\Http\Connector;
+use Saloon\Http\Request;
+use Saloon\Http\Response;
+use Saloon\Traits\OAuth2\AuthorizationCodeGrant;
 use Saloon\Traits\Plugins\AcceptsJson;
+use Throwable;
 
 class Monzo extends Connector
 {
     use AcceptsJson;
+    use AuthorizationCodeGrant;
 
     public function __construct(
         protected ?string $accessToken = null,
@@ -45,6 +55,7 @@ class Monzo extends Connector
     {
         $clone = clone $this;
         $clone->accessToken = $accessToken;
+        $clone->authenticator = null;
 
         return $clone;
     }
@@ -58,6 +69,7 @@ class Monzo extends Connector
         $clone->clientId = $clientId;
         $clone->clientSecret = $clientSecret;
         $clone->redirectUri = $redirectUri;
+        $clone->oauthConfig = $clone->defaultOauthConfig();
 
         return $clone;
     }
@@ -106,6 +118,47 @@ class Monzo extends Connector
         }
 
         return new TokenAuthenticator($this->accessToken);
+    }
+
+    protected function defaultOauthConfig(): OAuthConfig
+    {
+        return OAuthConfig::make()
+            ->setClientId((string) $this->clientId)
+            ->setClientSecret((string) $this->clientSecret)
+            ->setRedirectUri((string) $this->redirectUri)
+            ->setAuthorizeEndpoint('https://auth.monzo.com/')
+            ->setTokenEndpoint('/oauth2/token')
+            ->setUserEndpoint('/ping/whoami')
+            ->setAllowBaseUrlOverride(true);
+    }
+
+    protected function resolveAccessTokenRequest(string $code, OAuthConfig $oauthConfig): Request
+    {
+        return new ExchangeAuthorizationCodeRequest(
+            code: $code,
+            clientId: $oauthConfig->getClientId(),
+            clientSecret: $oauthConfig->getClientSecret(),
+            redirectUri: $oauthConfig->getRedirectUri(),
+        );
+    }
+
+    protected function resolveRefreshTokenRequest(OAuthConfig $oauthConfig, string $refreshToken): Request
+    {
+        return new RefreshAccessTokenRequest(
+            refreshToken: $refreshToken,
+            clientId: $oauthConfig->getClientId(),
+            clientSecret: $oauthConfig->getClientSecret(),
+        );
+    }
+
+    protected function resolveUserRequest(OAuthConfig $oauthConfig): Request
+    {
+        return new WhoamiRequest();
+    }
+
+    public function getRequestException(Response $response, ?Throwable $senderException): ?Throwable
+    {
+        return MonzoRequestException::fromResponse($response, $senderException);
     }
 
     /**

@@ -5,24 +5,17 @@ declare(strict_types=1);
 namespace JonPurvis\Monzo\Resources;
 
 use JonPurvis\Monzo\MonzoResponse;
-use JonPurvis\Monzo\OAuth\AuthorizationUrl;
 use JonPurvis\Monzo\Requests\OAuth\ExchangeAuthorizationCodeRequest;
 use JonPurvis\Monzo\Requests\OAuth\LogoutRequest;
 use JonPurvis\Monzo\Requests\OAuth\RefreshAccessTokenRequest;
 use JonPurvis\Monzo\Requests\Ping\WhoamiRequest;
+use Saloon\Exceptions\InvalidStateException;
 
 class OAuthResource extends MonzoResource
 {
     public function authorizationUrl(?string $state = null): string
     {
-        $monzo = $this->monzo();
-        $monzo->ensureOAuthCredentials();
-
-        return AuthorizationUrl::make(
-            clientId: (string) $monzo->getClientId(),
-            redirectUri: (string) $monzo->getRedirectUri(),
-            state: $state,
-        );
+        return $this->monzo()->getAuthorizationUrl(state: $state);
     }
 
     public function whoami(): MonzoResponse
@@ -30,8 +23,20 @@ class OAuthResource extends MonzoResource
         return $this->sendMonzoRequest(new WhoamiRequest());
     }
 
-    public function exchangeAuthorizationCode(string $code): MonzoResponse
-    {
+    /**
+     * Exchange an authorization code. When both state values are provided they must match.
+     *
+     * @see https://docs.monzo.com/#acquire-an-access-token
+     */
+    public function exchangeAuthorizationCode(
+        string $code,
+        ?string $state = null,
+        ?string $expectedState = null,
+    ): MonzoResponse {
+        if ($state !== null && $state !== '' && $expectedState !== null && $expectedState !== '' && ! hash_equals($expectedState, $state)) {
+            throw new InvalidStateException('OAuth state did not match. Abort the authentication process.');
+        }
+
         $monzo = $this->monzo();
         $monzo->ensureOAuthCredentials();
 

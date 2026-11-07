@@ -13,15 +13,17 @@ class WithdrawFromPotRequest extends Request implements HasBody
 {
     use HasFormBody;
 
+    protected string $dedupeId;
+
     protected Method $method = Method::PUT;
 
     public function __construct(
         protected string $potId,
         protected int $amount,
         protected string $destinationAccountId,
-        protected ?string $dedupeId = null,
+        ?string $dedupeId = null,
     ) {
-        //
+        $this->dedupeId = $dedupeId ?? bin2hex(random_bytes(16));
     }
 
     public function resolveEndpoint(): string
@@ -35,7 +37,7 @@ class WithdrawFromPotRequest extends Request implements HasBody
         return [
             'amount' => $this->amount,
             'destination_account_id' => $this->destinationAccountId,
-            'dedupe_id' => $this->dedupeId ?? bin2hex(random_bytes(16)),
+            'dedupe_id' => $this->dedupeId,
         ];
     }
 }

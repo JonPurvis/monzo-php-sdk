@@ -8,6 +8,7 @@ use JonPurvis\Monzo\MonzoResponse;
 use JonPurvis\Monzo\Requests\Transactions\AnnotateTransactionRequest;
 use JonPurvis\Monzo\Requests\Transactions\GetTransactionRequest;
 use JonPurvis\Monzo\Requests\Transactions\ListTransactionsRequest;
+use Saloon\PaginationPlugin\Paginator;
 
 class TransactionsResource extends MonzoResource
 {
@@ -21,6 +22,9 @@ class TransactionsResource extends MonzoResource
 
     /**
      * @param  list<string>  $expand
+     *
+     * `since` is an RFC3339 timestamp or a transaction id. `before` is an RFC3339 timestamp.
+     * `limit` defaults to 30 at Monzo and cannot exceed 100.
      */
     public function list(
         string $accountId,
@@ -36,6 +40,25 @@ class TransactionsResource extends MonzoResource
             limit: $limit,
             expand: $expand,
         ));
+    }
+
+    /**
+     * @param  list<string>  $expand
+     */
+    public function paginate(
+        string $accountId,
+        ?string $since = null,
+        ?string $before = null,
+        ?int $limit = null,
+        array $expand = [],
+    ): Paginator {
+        return (new ListTransactionsRequest(
+            accountId: $accountId,
+            since: $since,
+            before: $before,
+            limit: $limit,
+            expand: $expand,
+        ))->paginate($this->monzo());
     }
 
     /**

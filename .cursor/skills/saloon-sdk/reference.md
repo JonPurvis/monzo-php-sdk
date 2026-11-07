@@ -20,4 +20,4 @@ Generic content from this skill is intended for contribution to `saloonphp/saloo
 - Auth redirect: `https://auth.monzo.com/`
 - Most endpoints: `application/x-www-form-urlencoded` via `HasFormBody`
 - Receipts: JSON body (`HasJsonBody`) on `PUT /transaction-receipts`
-- Attachment flow: `POST /attachment/upload` then PUT/POST binary to returned `upload_url` (separate request with base URL override)
+- Attachment flow: `POST /attachment/upload` then POST binary to returned `upload_url` (separate request with base URL override)

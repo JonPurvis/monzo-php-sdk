@@ -6,6 +6,7 @@ namespace JonPurvis\Monzo\Requests\OAuth;
 
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
+use Saloon\Http\Auth\NullAuthenticator;
 use Saloon\Http\Request;
 use Saloon\Traits\Body\HasFormBody;
 
@@ -20,7 +21,7 @@ class RefreshAccessTokenRequest extends Request implements HasBody
         protected string $clientId,
         protected string $clientSecret,
     ) {
-        //
+        $this->authenticate(new NullAuthenticator());
     }
 
     public function resolveEndpoint(): string

@@ -4,11 +4,20 @@ declare(strict_types=1);
 
 namespace JonPurvis\Monzo\Requests\Transactions;
 
+use InvalidArgumentException;
+use JonPurvis\Monzo\Pagination\TransactionPaginator;
+use JonPurvis\Monzo\Requests\Concerns\FormatsExpandQuery;
 use Saloon\Enums\Method;
+use Saloon\Http\Connector;
 use Saloon\Http\Request;
+use Saloon\PaginationPlugin\Contracts\HasRequestPagination;
+use Saloon\PaginationPlugin\Contracts\Paginatable;
+use Saloon\PaginationPlugin\Paginator;
 
-class ListTransactionsRequest extends Request
+class ListTransactionsRequest extends Request implements HasRequestPagination, Paginatable
 {
+    use FormatsExpandQuery;
+
     protected Method $method = Method::GET;
 
     /**
@@ -21,7 +30,14 @@ class ListTransactionsRequest extends Request
         protected ?int $limit = null,
         protected array $expand = [],
     ) {
-        //
+        if ($this->limit !== null && ($this->limit < 1 || $this->limit > 100)) {
+            throw new InvalidArgumentException('Transaction list limit must be between 1 and 100.');
+        }
+    }
+
+    public function paginate(Connector $connector): Paginator
+    {
+        return new TransactionPaginator($connector, $this);
     }
 
     public function resolveEndpoint(): string

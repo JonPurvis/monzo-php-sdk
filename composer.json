@@ -1,5 +1,5 @@
 {
-    "name": "jonpurvis/monzo-php",
+    "name": "jonpurvis/monzo-php-sdk",
     "description": "Framework-agnostic Monzo Developer API SDK built with Saloon",
     "type": "library",
     "license": "MIT",
@@ -18,6 +18,7 @@
     ],
     "require": {
         "php": "^8.2",
+        "saloonphp/pagination-plugin": "^2.0",
         "saloonphp/saloon": "^4"
     },
     "require-dev": {

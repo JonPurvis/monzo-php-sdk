@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JonPurvis\Monzo\Requests\Receipts;
 
+use JonPurvis\Monzo\Receipts\ReceiptPayload;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
@@ -21,7 +22,7 @@ class CreateReceiptRequest extends Request implements HasBody
     public function __construct(
         protected array $receipt,
     ) {
-        //
+        ReceiptPayload::assertValid($receipt);
     }
 
     public function resolveEndpoint(): string

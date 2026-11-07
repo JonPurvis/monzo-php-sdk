@@ -18,7 +18,7 @@ final class AuthorizationUrl
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
             'state' => $state,
-        ], fn (mixed $value): bool => $value !== null && $value !== ''));
+        ], fn (mixed $value): bool => $value !== null && $value !== ''), '', '&', PHP_QUERY_RFC3986);
 
         return self::BASE.'?'.$query;
     }

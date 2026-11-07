@@ -6,6 +6,7 @@ namespace JonPurvis\Monzo\Requests\OAuth;
 
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
+use Saloon\Http\Auth\NullAuthenticator;
 use Saloon\Http\Request;
 use Saloon\Traits\Body\HasFormBody;
 
@@ -21,7 +22,7 @@ class ExchangeAuthorizationCodeRequest extends Request implements HasBody
         protected string $clientSecret,
         protected string $redirectUri,
     ) {
-        //
+        $this->authenticate(new NullAuthenticator());
     }
 
     public function resolveEndpoint(): string

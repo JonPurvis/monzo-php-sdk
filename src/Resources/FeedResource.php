@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JonPurvis\Monzo\Resources;
 
+use InvalidArgumentException;
 use JonPurvis\Monzo\MonzoResponse;
 use JonPurvis\Monzo\Requests\Feed\CreateFeedItemRequest;
 
@@ -18,6 +19,10 @@ class FeedResource extends MonzoResource
         array $params,
         ?string $url = null,
     ): MonzoResponse {
+        if ($params === []) {
+            throw new InvalidArgumentException('Feed item params are required.');
+        }
+
         return $this->sendMonzoRequest(new CreateFeedItemRequest(
             accountId: $accountId,
             type: $type,
@@ -36,6 +41,16 @@ class FeedResource extends MonzoResource
         ?string $titleColor = null,
         ?string $bodyColor = null,
     ): MonzoResponse {
+        if ($title === '' || $imageUrl === '') {
+            throw new InvalidArgumentException('A basic feed item requires title and image_url.');
+        }
+
+        foreach ([$backgroundColor, $titleColor, $bodyColor] as $color) {
+            if ($color !== null && preg_match('/^#[0-9A-Fa-f]{6}$/', $color) !== 1) {
+                throw new InvalidArgumentException('Feed item colours must be hex in the form #RRGGBB.');
+            }
+        }
+
         $params = array_filter([
             'title' => $title,
             'image_url' => $imageUrl,

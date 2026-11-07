@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace JonPurvis\Monzo\Requests\Transactions;
 
+use JonPurvis\Monzo\Requests\Concerns\FormatsExpandQuery;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 
 class GetTransactionRequest extends Request
 {
+    use FormatsExpandQuery;
+
     protected Method $method = Method::GET;
 
     /**

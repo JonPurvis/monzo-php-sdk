@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace JonPurvis\Monzo;
 
-use JonPurvis\Monzo\Exceptions\MonzoRequestException;
 use Saloon\Http\Response;
 
+/**
+ * Response type returned by the Monzo connector.
+ *
+ * Failed responses throw {@see \JonPurvis\Monzo\Exceptions\MonzoRequestException}
+ * via Saloon's `getRequestException()` hook when `throw()` is called.
+ */
 class MonzoResponse extends Response
 {
-    /**
-     * @throws MonzoRequestException
-     */
-    public function throw(): static
-    {
-        if ($this->failed()) {
-            throw MonzoRequestException::fromResponse($this);
-        }
-
-        return $this;
-    }
 }

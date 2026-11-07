@@ -12,6 +12,7 @@ use Saloon\Traits\Body\HasStringBody;
 
 /**
  * Uploads raw file bytes to a pre-signed URL returned by the Monzo attachment upload endpoint.
+ * Monzo documents this as POST, not a call to the API host.
  */
 class UploadFileToUrlRequest extends Request implements HasBody
 {
@@ -19,7 +20,7 @@ class UploadFileToUrlRequest extends Request implements HasBody
 
     public ?bool $allowBaseUrlOverride = true;
 
-    protected Method $method = Method::PUT;
+    protected Method $method = Method::POST;
 
     public function __construct(
         protected string $uploadUrl,
